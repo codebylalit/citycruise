@@ -4,7 +4,7 @@
     "slug": "citycruise",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./Images/GetRide.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -21,10 +21,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.lalit_namdev.citycruise"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ea2202c6-34bb-49ea-81af-31cfbdb1b6aa"
+      }
+    },
+    "owner": "heylalit",
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

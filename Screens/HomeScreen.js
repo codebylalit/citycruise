@@ -1,70 +1,165 @@
-import { StyleSheet, Text, View,SafeAreaView,Image } from 'react-native'
-import React from 'react'
-import tw from 'tailwind-react-native-classnames'
-import NavOptions from '../components/NavOptions'
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
-import {GOOGLE_MAP_KEY} from "@env"
-import { UseDispatch, useDispatch } from 'react-redux'
-import { setDestiny,setOrigin } from '../slices/navSlice'
-import NavFavourite from '../components/NavFavourite'
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  Image,
+  ImageBackground,
+  TouchableOpacity,
+} from "react-native";
+import React, { useState } from "react";
+import tw from "tailwind-react-native-classnames";
+import NavOptions from "../components/NavOptions";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { GOOGLE_MAP_KEY } from "@env";
+import { useDispatch } from "react-redux";
+import { setDestination, setOrigin } from "../slices/navSlice";
+import NavFavourite from "../components/NavFavourite";
+import { FontAwesome } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import { useNavigation } from "@react-navigation/native";
+import AuthenticationModal from "../components/DriverRegistration";
 
 const HomeScreen = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigation = useNavigation();
+  const [showLoginModal, setShowLoginModal] = useState(false); // State to control the visibility of the login modal
+
+  const handleDetectLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      setUserLocation(location.coords);
+
+      let address = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      dispatch(
+        setOrigin({
+          location: {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          },
+          description: address[0].name,
+        })
+      );
+      dispatch(setDestination(null));
+    } catch (error) {
+      console.log("Error getting location:", error);
+    }
+  };
 
   return (
-    <SafeAreaView style={tw`bg-green-600 h-full`}>
-      <View style={tw`p-5`}>
-        <Image
-          style={{
-            width: 100,
-            height: 100,
-            resizeMode: "contain",
-          }}
-          source={{
-            uri: "https://www.bing.com/images/search?view=detailV2&ccid=thB0k8vK&id=CC45E37259D0EF1180E5860727C65D7771D0DF88&thid=OIP.thB0k8vKI3T4sLSUg9ea5gHaEH&mediaurl=https%3a%2f%2fseekvectorlogo.com%2fwp-content%2fuploads%2f2018%2f07%2fcity-cruises-vector-logo.png&exph=500&expw=900&q=citycruise+logo&simid=607988239603419371&FORM=IRPRST&ck=552100AE11319367C776A2BCB87493D3&selectedIndex=0&itb=0",
-          }}
-        />
-        <GooglePlacesAutocomplete
-          placeholder="where from?"
-          styles={{
-            container: {
-              flex: 0,
-            },
-            textInput: {
-              fontSize: 18,
-            },
-          }}
-          onPress={(data, details = null) => {
-            dispatch(
-              setOrigin({
-                location: details.geometry.location,
-                description: data.description,
-              })
-            );
-            dispatch(setDestiny(null));
-          }}
-          fetchDetails={true}
-          returnKeyType={"search"}
-          enablePoweredByContainer={false}
-          minLength={2}
-          query={{
-            key: GOOGLE_MAP_KEY,
-            language: "en",
-          }}
-          nearbyPlacesAPI="GooglePlacesSearch"
-          debounce={400}
-        />
-        <NavOptions />
-        <NavFavourite />
-      </View>
+    <SafeAreaView style={tw`absolute`}>
+      <ImageBackground // Use ImageBackground for the background image
+        source={require("../Images/BG4.png")} // Path to your background image
+        style={styles.backgroundImage}
+      >
+        <View style={tw`p-4`}>
+          <Image
+            style={{
+              width: 100,
+              height: 100,
+              resizeMode: "cover",
+            }}
+          />
+          <Text style={styles.logoText}>CityCruise</Text>
+          <GooglePlacesAutocomplete
+            placeholder="where from?"
+            styles={{
+              container: {},
+              textInput: {
+                fontSize: 18,
+              },
+            }}
+            onPress={(data, details = null) => {
+              dispatch(
+                setOrigin({
+                  location: details.geometry.location,
+                  description: data.description,
+                })
+              );
+              dispatch(setDestination(null));
+            }}
+            fetchDetails={true}
+            returnKeyType={"search"}
+            enablePoweredByContainer={false}
+            minLength={2}
+            query={{
+              key: GOOGLE_MAP_KEY,
+              language: "en",
+            }}
+            nearbyPlacesAPI="GooglePlacesSearch"
+            debounce={400}
+          />
+          <TouchableOpacity onPress={handleDetectLocation}>
+            <View style={styles.liveLocationContainer}>
+              <FontAwesome name="location-arrow" size={24} color="gray" />
+            </View>
+          </TouchableOpacity>
+          <NavOptions />
+          <NavFavourite />
+          <TouchableOpacity>
+            <Text
+              style={styles.registrationButton}
+              onPress={() =>
+                navigation.navigate(isLoggedIn ? "Profile" : "Authentication")
+              }
+            >
+              {isLoggedIn ? "My Profile" : "Become CityCruise Driver"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        {showLoginModal && ( // Render the login modal only if showLoginModal is true
+          <AuthenticationModal isLoggedIn={isLoggedIn} />
+        )}
+      </ImageBackground>
     </SafeAreaView>
   );
-}
+};
 
-export default HomeScreen
+export default HomeScreen;
 
 const styles = StyleSheet.create({
-    text:{
-        color:"blue"
-    }
-})
+  text: {
+    color: "blue",
+  },
+  logoText: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "black",
+    position: "absolute",
+    fontFamily: "sans-serif",
+    left: -30,
+    margin: 40,
+  },
+  liveLocationContainer: {
+    position: "absolute",
+    right: 5,
+    bottom: 5,
+    backgroundColor: "whitesmoke",
+    borderRadius: 50,
+    padding: 10,
+  },
+  registrationButton: {
+    top: 190,
+    textAlign: "center",
+    backgroundColor: "green", // CityCruise primary color
+    borderRadius: 5,
+    padding: 15,
+    alignItems: "center",
+    color: "#FFFFFF", // White text color
+    fontWeight: "bold",
+  },
+  backgroundImage: {
+    width: "100%", // Cover the entire width
+    height: "100%", // Cover the entire height
+  },
+});

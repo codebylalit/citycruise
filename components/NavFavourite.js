@@ -30,17 +30,17 @@ const NavFavourite = () => {
         />
       }}
       renderItem={({ item:{location,destination,icon} }) => ( // Destructure item here
-        <TouchableOpacity style={tw`flex-row items-center p-5`}>
+        <TouchableOpacity style={tw`flex-row items-center p-4`}>
           <Icon
-            style={tw`mr-4 rounded-full bg-gray-300 p-3`}
+            style={tw`mr-4 rounded-full bg-white p-4`}
             name={icon}
             type='ionicon'
-            color='white'
+            color='gray'
             size={18}
           />
           <View>
             <Text style={tw`font-semibold text-lg`}>{location}</Text>
-            <Text style={tw`text-gray-400`} >{destination}</Text>
+            <Text style={tw`text-white`} >{destination}</Text>
           </View>
         </TouchableOpacity>
       )}

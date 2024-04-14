@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectDestination,
   selectOrigin,
-  setTravelTimeInfo,
+  setTravelTimeInformation,
 } from "../slices/navSlice";
 import MapViewDirections from "react-native-maps-directions";
 import { GOOGLE_MAP_KEY } from "@env";
@@ -35,7 +35,7 @@ const Map = () => {
       )
         .then((res) => res.json())
         .then((data) => {
-          dispatch(setTravelTimeInfo(data.rows[0].elements[0]));
+          dispatch(setTravelTimeInformation(data.rows[0].elements[0]));
         });
     };
 
@@ -48,12 +48,13 @@ const Map = () => {
       style={tw`flex-1`}
       mapType="mutedStandard"
       initialRegion={{
-        latitude: 37.78835,
-        longitude: -122.4324,
+        latitude: 24.8828,
+        longitude: 72.8588,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
+
         // latitude: origin,
-        // longitude: origin.location.lng,
+        // longitude: origin.lng,
         // latitudeDelta: 0.005,
         // longitudeDelta: 0.005,
       }}
